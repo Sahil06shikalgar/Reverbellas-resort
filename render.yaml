@@ -1,0 +1,49 @@
+services:
+  # ---- Backend: Express + MongoDB API ----
+  - type: web
+    name: riverbells-backend
+    runtime: node
+    rootDir: BackEnd
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false # set in Render dashboard (MongoDB Atlas / Render Managed DB connection string)
+      - key: JWT_SECRET
+        sync: false # set a long random string in the dashboard
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_URL
+        sync: false # set to the frontend public URL in the dashboard (no trailing slash)
+      - key: ADMIN_EMAIL
+        value: admin@riverbells.com
+      - key: ADMIN_PASSWORD
+        sync: false # set a strong password in the dashboard before first start
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        sync: false
+      - key: MAIL_SECURE
+        sync: false
+      - key: MAIL_USER
+        sync: false
+      - key: MAIL_PASS
+        sync: false
+      - key: RESORT_EMAIL
+        sync: false
+
+  # ---- Frontend: static React (Vite) build ----
+  - type: web
+    name: riverbells-frontend
+    runtime: static
+    rootDir: FrontEnd
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # set to your FULL backend URL including /api, e.g. https://riverbells-backend.onrender.com/api

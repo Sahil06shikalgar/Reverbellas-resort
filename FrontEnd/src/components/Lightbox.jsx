@@ -1,8 +1,20 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Lightbox({ items, index, onClose, onNavigate }) {
   const item = items?.[index];
+  const [closing, setClosing] = useState(false);
+  const timerRef = useRef(null);
+
+  const close = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    timerRef.current = setTimeout(onClose, 250);
+  }, [closing, onClose]);
+
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current);
+  }, []);
 
   const prev = useCallback(() => {
     onNavigate?.((index - 1 + items.length) % items.length);
@@ -14,21 +26,21 @@ export default function Lightbox({ items, index, onClose, onNavigate }) {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') close();
       else if (e.key === 'ArrowLeft') prev();
       else if (e.key === 'ArrowRight') next();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose, prev, next]);
+  }, [close, prev, next]);
 
   if (!item) return null;
 
   return (
-    <div className="lightbox" role="dialog" aria-modal="true" aria-label={item.label}>
+    <div className={`lightbox${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={item.label}>
       <button
         className="lightbox-close"
-        onClick={onClose}
+        onClick={close}
         aria-label="Close image"
       >
         <X size={26} strokeWidth={1.5} />

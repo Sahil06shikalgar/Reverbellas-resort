@@ -15,18 +15,46 @@ export default function Gallery() {
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
     const ctx = gsap.context(() => {
-      if (prefersReduced) return;
+      const reveal = (y) =>
+        gsap.fromTo(
+          '.gallery-item',
+          { opacity: 0, y, scale: 0.99 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.7,
+            stagger: 0.08,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: rootRef.current,
+              start: 'top 85%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      const mm = gsap.matchMedia();
+      mm.add('(min-width: 901px)', () => reveal(24));
+      mm.add('(max-width: 900px)', () => reveal(16));
+    }, rootRef);
+    return () => ctx.revert();
+  }, []);
+
+  const firstFilter = useRef(true);
+  useEffect(() => {
+    if (firstFilter.current) {
+      firstFilter.current = false;
+      return;
+    }
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+    const ctx = gsap.context(() => {
       gsap.fromTo(
         '.gallery-item',
-        { autoAlpha: 0, y: 40 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: rootRef.current, start: 'top 80%' },
-        }
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.35, stagger: 0.06, ease: 'power2.out' }
       );
     }, rootRef);
     return () => ctx.revert();

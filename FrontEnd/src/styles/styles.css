@@ -2218,11 +2218,11 @@ textarea:focus-visible {
   display: block;
   position: relative;
   top: -9%;
-  transition: transform 0.8s var(--ease-soft);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .gallery-item:hover img {
-  transform: scale(1.04);
+  transform: scale(1.02);
 }
 
 .gallery-tall {
@@ -2263,6 +2263,21 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   padding: 4rem 5rem;
+  animation: lightbox-fade-in 0.3s ease-out both;
+}
+
+.lightbox.is-closing {
+  animation: lightbox-fade-out 0.25s ease-in both;
+}
+
+@keyframes lightbox-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lightbox-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .lightbox-close {
@@ -2293,6 +2308,21 @@ textarea:focus-visible {
   height: auto;
   display: block;
   object-fit: contain;
+  animation: lightbox-img-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lightbox.is-closing .lightbox-image {
+  animation: lightbox-img-out 0.25s ease-in both;
+}
+
+@keyframes lightbox-img-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lightbox-img-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.98); }
 }
 
 .lightbox-nav {

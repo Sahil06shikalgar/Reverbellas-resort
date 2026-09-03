@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import { getBookingById } from '../services/bookingService';
 import { getBookingPayments } from '../services/paymentService';
 
@@ -39,7 +40,10 @@ export default function PaymentSuccess() {
         setBilling(b.data.billing || null);
         setPayments(p.data || []);
       } catch (e) {
-        if (active) setError(e.message || 'Could not load booking.');
+        if (active) {
+          setError(e.message || 'Could not load booking.');
+          toast.error(e.message || 'Could not load booking.');
+        }
       } finally {
         if (active) setLoading(false);
       }

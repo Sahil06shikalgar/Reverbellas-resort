@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Loader from './components/Loader';
@@ -53,6 +54,13 @@ export default function App() {
   return (
     <div className="app-shell">
       {showLoader && <Loader onComplete={() => setShowLoader(false)} />}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          className: 'rb-toast',
+        }}
+      />
       <AppRoutes ready={!showLoader} />
     </div>
   );

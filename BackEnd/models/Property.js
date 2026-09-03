@@ -69,6 +69,29 @@ const propertySchema = new mongoose.Schema(
       default: ""
     },
 
+    amenities: [
+      {
+        type: String,
+        trim: true
+      }
+    ],
+
+    // Image references. Store keys/URLs; the frontend resolves these
+    // against the project's local assets (see imageMap in the frontend).
+    images: [
+      {
+        type: String,
+        trim: true
+      }
+    ],
+
+    // When false, the property is not shown in the public overnight stay
+    // search (e.g. event-only lawns).
+    bookableFromWebsite: {
+      type: Boolean,
+      default: true
+    },
+
     active: {
       type: Boolean,
       default: true

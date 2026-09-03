@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getCustomers, getCustomerById } from '../services/customerService';
 
 const STATUS_LABEL = {
@@ -14,19 +15,17 @@ export default function CustomerHistory() {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   const load = async (term = '') => {
     setLoading(true);
-    setError('');
     try {
       const r = await getCustomers({ search: term });
       setCustomers(r.data || []);
     } catch (e) {
-      setError(e.message || 'Could not load customers.');
+      toast.error(e.message || 'Could not load customers.');
     } finally {
       setLoading(false);
     }
@@ -45,7 +44,7 @@ export default function CustomerHistory() {
       const r = await getCustomerById(c._id);
       setDetail(r.data);
     } catch (e) {
-      setError(e.message || 'Could not load customer history.');
+      toast.error(e.message || 'Could not load customer history.');
     } finally {
       setDetailLoading(false);
     }
@@ -71,8 +70,6 @@ export default function CustomerHistory() {
         />
         <button type="button" className="admin-btn" onClick={() => load(search)}>Search</button>
       </div>
-
-      {error && <div className="admin-error">{error}</div>}
 
       {loading ? (
         <div className="admin-loading">Loading customers…</div>

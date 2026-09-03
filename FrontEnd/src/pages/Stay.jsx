@@ -78,7 +78,7 @@ export default function StayPage() {
   return (
     <>
       <Navbar />
-      <section className="section stay-hero" id="stay-hero" ref={heroRef}>
+      <section className="section stay-hero" id="accommodation" ref={heroRef}>
         <div className="stay-hero-media">
           <img src={images.WA0004} alt="Lakeside sunset at Riverbells Resort" />
         </div>

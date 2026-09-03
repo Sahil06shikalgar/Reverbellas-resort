@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getBookingById } from '../services/bookingService';
@@ -44,7 +45,6 @@ export default function PaymentPage() {
   const [notes, setNotes] = useState('');
   const [paymentType, setPaymentType] = useState('Advance');
   const [saving, setSaving] = useState(false);
-  const [fieldError, setFieldError] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -59,7 +59,10 @@ export default function PaymentPage() {
         setBilling(b.data.billing);
         setPayments(p.data || []);
       } catch (e) {
-        if (active) setError(e.message || 'Could not load this booking.');
+        if (active) {
+          setError(e.message || 'Could not load this booking.');
+          toast.error(e.message || 'Could not load this booking.');
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -96,7 +99,6 @@ export default function PaymentPage() {
 
   const fillFull = () => {
     setAmount(String(balance));
-    setFieldError('');
   };
 
   const needsRef = method !== 'Cash';
@@ -109,15 +111,15 @@ export default function PaymentPage() {
     if (!booking) return;
 
     if (!Number.isFinite(userAmount) || userAmount <= 0) {
-      setFieldError('Enter a payment amount greater than 0.');
+      toast.error('Enter a payment amount greater than 0.');
       return;
     }
     if (userAmount > balance) {
-      setFieldError(`Payment cannot exceed the pending amount of ${inr(balance)}.`);
+      toast.error(`Payment amount cannot exceed the pending balance of ${inr(balance)}.`);
       return;
     }
     if (needsRef && !String(ref || '').trim()) {
-      setFieldError('Please enter the transaction / reference ID.');
+      toast.error('Please enter the transaction / reference ID.');
       return;
     }
 
@@ -133,7 +135,6 @@ export default function PaymentPage() {
 
     setSaving(true);
     setError('');
-    setFieldError('');
 
     try {
       const resp = await addBookingPayment(bookingId, {
@@ -145,12 +146,13 @@ export default function PaymentPage() {
         notes: noteText,
       });
       if (resp && resp.success) {
+        toast.success('Payment recorded successfully.');
         navigate(`/payment-success?booking=${bookingId}`);
       } else {
-        setError(resp?.message || 'Payment could not be recorded.');
+        toast.error(resp?.message || 'Payment could not be recorded.');
       }
     } catch (err) {
-      setError(err.message || 'Payment could not be recorded.');
+      toast.error(err.message || 'Payment could not be recorded.');
     } finally {
       setSaving(false);
     }
@@ -259,8 +261,6 @@ export default function PaymentPage() {
             </p>
           </div>
 
-          {error && <div className="guest-pay-error">{error}</div>}
-
           {isFullyPaid ? (
             <div className="pp-complete">
               <div className="pp-complete-icon">✓</div>
@@ -298,8 +298,6 @@ export default function PaymentPage() {
                   <p>Select a payment method and enter the details.</p>
                 </div>
 
-                {fieldError && <div className="guest-pay-error">{fieldError}</div>}
-
                 <form onSubmit={submit} noValidate>
                   <div className="pp-field">
                     <label className="pp-label">Payment Method</label>
@@ -311,7 +309,6 @@ export default function PaymentPage() {
                           className={`pp-method ${method === m.id ? 'active' : ''}`}
                           onClick={() => {
                             setMethod(m.id);
-                            setFieldError('');
                           }}
                         >
                           {m.label}
@@ -330,7 +327,7 @@ export default function PaymentPage() {
                         min="1"
                         max={balance}
                         value={amount}
-                        onChange={(e) => { setAmount(e.target.value); setFieldError(''); }}
+                        onChange={(e) => { setAmount(e.target.value); }}
                         className="pp-input"
                       />
                     </div>

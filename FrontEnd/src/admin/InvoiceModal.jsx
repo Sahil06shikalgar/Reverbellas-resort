@@ -1,3 +1,5 @@
+import { gstTaxLabel } from '../utils/billingLabels';
+
 export default function InvoiceModal({ booking, billing, payments, onClose }) {
   const customer = booking.customer || {};
   const property = booking.property || {};
@@ -83,7 +85,7 @@ export default function InvoiceModal({ booking, billing, payments, onClose }) {
           <div className="invoice-summary">
             <div className="invoice-line"><span>Stay Charges</span><span>₹{billing?.baseAmount || 0}</span></div>
             <div className="invoice-line"><span>Discount</span><span>-₹{billing?.discountAmount || 0}</span></div>
-            <div className="invoice-line"><span>Tax</span><span>₹{billing?.tax || 0}</span></div>
+            <div className="invoice-line"><span>{gstTaxLabel(billing)}</span><span>₹{billing?.tax || 0}</span></div>
             <div className="invoice-line"><span>Other Charges</span><span>₹{billing?.otherCharges || 0}</span></div>
             <div className="invoice-line"><span>Food / Service Charges</span><span>₹{billing?.servicesTotal || 0}</span></div>
             <div className="invoice-line grand"><span>Grand Total</span><span>₹{billing?.grandTotal || 0}</span></div>

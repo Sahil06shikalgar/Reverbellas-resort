@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { getBookings } from '../services/bookingService';
 import { getProperties } from '../services/propertyService';
 import BookingDetails from './BookingDetails';
@@ -22,19 +23,17 @@ export default function BookingCalendar() {
   const [propertyFilter, setPropertyFilter] = useState('all');
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
 
   const load = async () => {
     setLoading(true);
-    setError('');
     try {
       const [bResp, pResp] = await Promise.all([getBookings(), getProperties()]);
       setBookings(bResp.data || []);
       setProperties(pResp.data || []);
     } catch (e) {
-      setError(e.message || 'Could not load bookings.');
+      toast.error(e.message || 'Could not load bookings.');
     } finally {
       setLoading(false);
     }
@@ -121,8 +120,6 @@ export default function BookingCalendar() {
           </select>
         </div>
       </div>
-
-      {error && <div className="admin-error">{error}</div>}
 
       {loading ? (
         <div className="admin-loading">Loading calendar…</div>

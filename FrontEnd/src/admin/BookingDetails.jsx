@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getBookingById, changeBookingStatus, addServiceCharge } from '../services/bookingService';
 import { getBookingPayments, addPayment } from '../services/paymentService';
 import InvoiceModal from './InvoiceModal';
+import { gstTaxLabel } from '../utils/billingLabels';
 
 const STATUS_LABEL = {
   inquiry: 'Inquiry',
@@ -38,8 +40,7 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionBusy, setActionBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   const [payAmount, setPayAmount] = useState('');
   const [payMode, setPayMode] = useState('Cash');
@@ -57,7 +58,6 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
 
   const load = async () => {
     setLoading(true);
-    setError('');
     try {
       const [bResp, pResp] = await Promise.all([
         getBookingById(bookingId),
@@ -65,8 +65,10 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
       ]);
       setData(bResp.data);
       setPayments(pResp.data || []);
+      setLoadError('');
     } catch (e) {
-      setError(e.message || 'Could not load booking details.');
+      setLoadError(e.message || 'Could not load booking details.');
+      toast.error(e.message || 'Could not load booking details.');
     } finally {
       setLoading(false);
     }
@@ -83,15 +85,13 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
   const runStatus = async () => {
     if (!booking || !NEXT_STATUS[booking.status]) return;
     setActionBusy(true);
-    setError('');
-    setNotice('');
     try {
       const res = await changeBookingStatus(booking._id, NEXT_STATUS[booking.status]);
-      setNotice(res.message || 'Status updated.');
+      toast.success(res.message || 'Status updated.');
       await load();
       onSaved?.();
     } catch (e) {
-      setError(e.message || 'Status change failed.');
+      toast.error(e.message || 'Status change failed.');
     } finally {
       setActionBusy(false);
     }
@@ -100,15 +100,13 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
   const cancelBooking = async () => {
     if (!booking || booking.status === 'cancelled' || booking.status === 'completed') return;
     setActionBusy(true);
-    setError('');
-    setNotice('');
     try {
       const res = await changeBookingStatus(booking._id, 'cancelled');
-      setNotice(res.message || 'Booking cancelled.');
+      toast.success(res.message || 'Booking cancelled.');
       await load();
       onSaved?.();
     } catch (e) {
-      setError(e.message || 'Could not cancel booking.');
+      toast.error(e.message || 'Could not cancel booking.');
     } finally {
       setActionBusy(false);
     }
@@ -117,8 +115,6 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
   const submitPayment = async (e) => {
     e.preventDefault();
     setPayBusy(true);
-    setError('');
-    setNotice('');
     try {
       const res = await addPayment({
         bookingId,
@@ -127,7 +123,7 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
         paymentType: payType,
         reference: payRef,
       });
-      setNotice(res.message || 'Payment recorded.');
+      toast.success(res.message || 'Payment recorded.');
       setPayAmount('');
       setPayRef('');
       setPayBusy(false);
@@ -135,15 +131,13 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
       onSaved?.();
     } catch (err) {
       setPayBusy(false);
-      setError(err.message || 'Payment failed.');
+      toast.error(err.message || 'Payment failed.');
     }
   };
 
   const submitService = async (e) => {
     e.preventDefault();
     setSvcBusy(true);
-    setError('');
-    setNotice('');
     try {
       const res = await addServiceCharge(bookingId, {
         description: svcDesc,
@@ -151,7 +145,7 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
         quantity: Number(svcQty),
         rate: Number(svcRate),
       });
-      setNotice(res.message || 'Service charge added.');
+      toast.success(res.message || 'Service charge added.');
       setSvcDesc('');
       setSvcQty(1);
       setSvcRate(0);
@@ -160,12 +154,12 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
       onSaved?.();
     } catch (err) {
       setSvcBusy(false);
-      setError(err.message || 'Could not add service charge.');
+      toast.error(err.message || 'Could not add service charge.');
     }
   };
 
   if (loading) return <div className="modal-overlay"><div className="modal-box admin-loading">Loading…</div></div>;
-  if (!booking) return <div className="modal-overlay"><div className="modal-box">{error}</div></div>;
+  if (!booking) return <div className="modal-overlay"><div className="modal-box">{loadError}</div></div>;
 
   const balance = billing?.balance ?? 0;
   const canCheckout = balance <= 0;
@@ -182,9 +176,6 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
           </div>
           <button type="button" className="modal-close" onClick={onClose} aria-label="Close">×</button>
         </div>
-
-        {notice && <div className="admin-notice">{notice}</div>}
-        {error && <div className="admin-error">{error}</div>}
 
         <div className="modal-body">
           <div className="detail-grid">
@@ -220,7 +211,7 @@ export default function BookingDetails({ bookingId, onClose, onSaved }) {
               <div className="billing-sheet">
                 <div className="billing-row"><span>Base Stay Amount</span><span>₹{billing.baseAmount}</span></div>
                 <div className="billing-row"><span>Discount</span><span>-₹{billing.discountAmount}</span></div>
-                <div className="billing-row"><span>Tax</span><span>₹{billing.tax}</span></div>
+                <div className="billing-row"><span>{gstTaxLabel(billing)}</span><span>₹{billing.tax}</span></div>
                 <div className="billing-row"><span>Other Charges</span><span>₹{billing.otherCharges}</span></div>
                 <div className="billing-row"><span>Food / Service</span><span>₹{billing.servicesTotal}</span></div>
                 <div className="billing-row total"><span>Grand Total</span><span>₹{billing.grandTotal}</span></div>

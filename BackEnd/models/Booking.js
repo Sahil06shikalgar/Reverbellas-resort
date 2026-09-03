@@ -98,6 +98,12 @@ const bookingSchema = new mongoose.Schema(
       default: "Direct"
     },
 
+    contactChannel: {
+      type: String,
+      enum: ["Website", "WhatsApp", "Phone", "Walk-in", "Other"],
+      default: "Website"
+    },
+
     status: {
       type: String,
       enum: [

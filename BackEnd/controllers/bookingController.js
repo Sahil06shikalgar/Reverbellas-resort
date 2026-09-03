@@ -34,6 +34,7 @@ export const createBooking = async (req, res, next) => {
       adults,
       children = 0,
       source = "Direct",
+      contactChannel = "Website",
       status = "inquiry",
       pricing = {},
       notes = ""
@@ -167,6 +168,7 @@ export const createBooking = async (req, res, next) => {
       children,
 
       source,
+      contactChannel,
       status,
 
       pricing: {

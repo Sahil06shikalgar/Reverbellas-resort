@@ -44,7 +44,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="footer section-bg-dark">
+    <footer id="contact" className="footer section-bg-dark">
       <div className="container footer-top">
         <div className="footer-brand">
           <span className="footer-wordmark">Riverbells Resort</span>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getProperties, createProperty, updateProperty } from '../services/propertyService';
 
 const TYPES = ['villa', 'room', 'lawn', 'tent', 'other'];
@@ -12,6 +13,10 @@ const empty = {
   maxGuests: 1,
   standardWeekdayRate: 0,
   standardWeekendRate: 0,
+  description: '',
+  amenities: [],
+  images: [],
+  bookableFromWebsite: true,
   active: true,
   parentProperty: '',
 };
@@ -19,19 +24,16 @@ const empty = {
 export default function PropertySettings() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   const [editing, setEditing] = useState(null);
   const [showNew, setShowNew] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    setError('');
     try {
       const r = await getProperties();
       setProperties(r.data || []);
     } catch (e) {
-      setError(e.message || 'Could not load properties.');
+      toast.error(e.message || 'Could not load properties.');
     } finally {
       setLoading(false);
     }
@@ -53,9 +55,6 @@ export default function PropertySettings() {
         </div>
         <button type="button" className="admin-btn" onClick={() => setShowNew(true)}>+ Add Property</button>
       </div>
-
-      {notice && <div className="admin-notice">{notice}</div>}
-      {error && <div className="admin-error">{error}</div>}
 
       {loading ? (
         <div className="admin-loading">Loading properties…</div>
@@ -108,10 +107,10 @@ export default function PropertySettings() {
             try {
               await updateProperty(editing._id, form);
               setEditing(null);
-              setNotice('Property updated.');
+              toast.success('Property updated.');
               await load();
             } catch (e) {
-              setError(e.message || 'Could not update property.');
+              toast.error(e.message || 'Could not update property.');
               throw e;
             }
           }}
@@ -127,10 +126,10 @@ export default function PropertySettings() {
             try {
               await createProperty(form);
               setShowNew(false);
-              setNotice('Property created.');
+              toast.success('Property created.');
               await load();
             } catch (e) {
-              setError(e.message || 'Could not create property.');
+              toast.error(e.message || 'Could not create property.');
               throw e;
             }
           }}
@@ -152,6 +151,13 @@ function PropertyForm({ title, initial, villas, onClose, onSubmit }) {
           maxGuests: initial.maxGuests,
           standardWeekdayRate: initial.standardWeekdayRate,
           standardWeekendRate: initial.standardWeekendRate,
+          description: initial.description || '',
+          amenities: Array.isArray(initial.amenities) ? initial.amenities : [],
+          images: Array.isArray(initial.images) ? initial.images : [],
+          bookableFromWebsite:
+            typeof initial.bookableFromWebsite === 'undefined'
+              ? true
+              : initial.bookableFromWebsite,
           active: initial.active,
           parentProperty: initial.parentProperty?._id || initial.parentProperty || '',
         }
@@ -168,6 +174,15 @@ function PropertyForm({ title, initial, villas, onClose, onSubmit }) {
   };
 
   const updNum = (f) => (e) => setForm((x) => ({ ...x, [f]: Number(e.target.value) }));
+
+  const updList = (f) => (e) =>
+    setForm((x) => ({
+      ...x,
+      [f]: e.target.value
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    }));
 
   const submit = async (e) => {
     e.preventDefault();
@@ -239,6 +254,26 @@ function PropertyForm({ title, initial, villas, onClose, onSubmit }) {
                 <option value="true">Active</option>
                 <option value="false">Inactive</option>
               </select>
+            </div>
+            <div className="admin-field">
+              <label>Bookable From Website</label>
+              <select className="admin-input" value={form.bookableFromWebsite ? 'true' : 'false'} onChange={(e) => setForm((x) => ({ ...x, bookableFromWebsite: e.target.value === 'true' }))}>
+                <option value="true">Yes</option>
+                <option value="false">No (excluded from search)</option>
+              </select>
+            </div>
+            <div className="admin-field admin-field-wide">
+              <label>Description</label>
+              <textarea className="admin-input" rows="3" value={form.description} onChange={update('description')} placeholder="Short guest-facing description shown in search results" />
+            </div>
+            <div className="admin-field admin-field-wide">
+              <label>Amenities (comma-separated)</label>
+              <input type="text" className="admin-input" value={form.amenities.join(', ')} onChange={updList('amenities')} placeholder="King Bed, AC, Pool Access, Balcony" />
+            </div>
+            <div className="admin-field admin-field-wide">
+              <label>Images (file keys, comma-separated)</label>
+              <input type="text" className="admin-input" value={form.images.join(', ')} onChange={updList('images')} placeholder="e.g. fullvilla, fullvilla-2, pool" />
+              <small className="admin-hint">Resolved against FrontEnd/src/assets/media/<em>filename</em>.jpg</small>
             </div>
           </div>
           <div className="admin-form-actions">

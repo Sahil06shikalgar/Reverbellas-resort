@@ -10,9 +10,14 @@ const STARTER = [
     maxAdults: 8,
     maxChildren: 4,
     maxGuests: 12,
-    standardWeekdayRate: 0,
-    standardWeekendRate: 0,
-    active: true
+    standardWeekdayRate: 45000,
+    standardWeekendRate: 55000,
+    description:
+      "The entire Riverbells villa to yourselves — four bedrooms, a private pool, and a sprawling lawn overlooking the lake.",
+    amenities: ["4 Bedrooms", "Private Pool", "Lake View", "Wardrobe", "AC"],
+    images: ["FULL-VILLA"],
+    bookableFromWebsite: true,
+    active: true,
   },
   {
     propertyCode: "ROOM-101",
@@ -21,9 +26,14 @@ const STARTER = [
     maxAdults: 2,
     maxChildren: 2,
     maxGuests: 4,
-    standardWeekdayRate: 0,
-    standardWeekendRate: 0,
-    active: true
+    standardWeekdayRate: 6000,
+    standardWeekendRate: 8000,
+    description:
+      "A bright garden-facing room with a king bed, ensuite bath, and a private balcony for slow morning coffees.",
+    amenities: ["King Bed", "AC", "Balcony", "Hot Water"],
+    images: ["ROOM-101"],
+    bookableFromWebsite: true,
+    active: true,
   },
   {
     propertyCode: "ROOM-102",
@@ -32,9 +42,14 @@ const STARTER = [
     maxAdults: 2,
     maxChildren: 2,
     maxGuests: 4,
-    standardWeekdayRate: 0,
-    standardWeekendRate: 0,
-    active: true
+    standardWeekdayRate: 6000,
+    standardWeekendRate: 8000,
+    description:
+      "A twin-toward-the-lake room with lake-facing windows, ensuite bath, and easy access to the pool deck.",
+    amenities: ["Lake View", "AC", "King Bed", "Ensuite Bath"],
+    images: ["ROOM-102"],
+    bookableFromWebsite: true,
+    active: true,
   },
   {
     propertyCode: "MARRIAGE-LAWN",
@@ -45,7 +60,11 @@ const STARTER = [
     maxGuests: 150,
     standardWeekdayRate: 0,
     standardWeekendRate: 0,
-    active: true
+    description: "Expansive lawn for weddings and events, booked on enquiry.",
+    amenities: ["Event Lawn", "Seating", "Lighting", "Parking"],
+    images: ["MARRIAGE-LAWN"],
+    bookableFromWebsite: false,
+    active: true,
   },
   {
     propertyCode: "LAKESIDE-TENT",
@@ -54,10 +73,15 @@ const STARTER = [
     maxAdults: 2,
     maxChildren: 2,
     maxGuests: 4,
-    standardWeekdayRate: 0,
-    standardWeekendRate: 0,
-    active: true
-  }
+    standardWeekdayRate: 4500,
+    standardWeekendRate: 6000,
+    description:
+      "Glamping right by the water — a king bed, ensuite bath, and a wooden deck that reaches out over the lake.",
+    amenities: ["Lake View", "King Bed", "Ensuite", "Deck"],
+    images: ["LAKESIDE-TENT"],
+    bookableFromWebsite: true,
+    active: true,
+  },
 ];
 
 export const seedIfEmpty = async () => {

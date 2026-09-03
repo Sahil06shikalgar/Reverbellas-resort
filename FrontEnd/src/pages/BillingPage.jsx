@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getBookingById } from '../services/bookingService';
+import { gstTaxLabel } from '../utils/billingLabels';
 
 const inr = (n) =>
   new Intl.NumberFormat('en-IN', {
@@ -29,7 +31,10 @@ export default function BillingPage() {
         setBooking(b.data.booking);
         setBilling(b.data.billing || null);
       } catch (e) {
-        if (active) setError(e.message || 'Unable to load billing details.');
+        if (active) {
+          setError(e.message || 'Unable to load billing details.');
+          toast.error(e.message || 'Unable to load billing details.');
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -84,8 +89,6 @@ export default function BillingPage() {
             <p>Review your booking details and total amount before proceeding to payment.</p>
           </div>
 
-          {error && <div className="guest-pay-error">{error}</div>}
-
           <div className="guest-pay-banner">
             <div>
               <span className="guest-pay-banner-label">Booking</span>
@@ -122,7 +125,7 @@ export default function BillingPage() {
               <div className="guest-pay-totals">
                 <div className="guest-pay-row"><span>Stay Amount</span><strong>{inr(billing.baseAmount)}</strong></div>
                 <div className="guest-pay-row"><span>Discount</span><strong>-{inr(billing.discountAmount)}</strong></div>
-                <div className="guest-pay-row"><span>Tax</span><strong>{inr(billing.tax)}</strong></div>
+                <div className="guest-pay-row"><span>{gstTaxLabel(billing)}</span><strong>{inr(billing.tax)}</strong></div>
                 <div className="guest-pay-row"><span>Other Charges</span><strong>{inr(billing.otherCharges)}</strong></div>
                 <div className="guest-pay-row"><span>Food / Service Charges</span><strong>{inr(billing.servicesTotal)}</strong></div>
                 <div className="guest-pay-row"><strong>Grand Total</strong><strong>{inr(billing.grandTotal)}</strong></div>

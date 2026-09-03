@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getBookings } from '../services/bookingService';
 import { getProperties } from '../services/propertyService';
 import BookingDetails from './BookingDetails';
@@ -20,18 +21,16 @@ export default function AllBookings() {
   const [status, setStatus] = useState('');
   const [property, setProperty] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
   const [showNew, setShowNew] = useState(false);
 
   const load = async (params = {}) => {
     setLoading(true);
-    setError('');
     try {
       const bResp = await getBookings(params);
       setBookings(bResp.data || []);
     } catch (e) {
-      setError(e.message || 'Could not load bookings.');
+      toast.error(e.message || 'Could not load bookings.');
     } finally {
       setLoading(false);
     }
@@ -91,8 +90,6 @@ export default function AllBookings() {
         <button type="button" className="admin-btn" onClick={applyFilters}>Apply</button>
         <button type="button" className="admin-btn ghost" onClick={clearFilters}>Clear</button>
       </div>
-
-      {error && <div className="admin-error">{error}</div>}
 
       {loading ? (
         <div className="admin-loading">Loading bookings…</div>

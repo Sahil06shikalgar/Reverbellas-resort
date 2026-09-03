@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import {
   getInventory,
   createInventory,
@@ -22,17 +23,14 @@ export default function Inventory() {
   const [showModal, setShowModal] = useState(false);
   const [modal, setModal] = useState(null); // {type:'new'|'in'|'out'|'edit', item}
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
 
   const load = async () => {
     setLoading(true);
-    setError('');
     try {
       const r = await getInventory({ search });
       setItems(r.data || []);
     } catch (e) {
-      setError(e.message || 'Could not load inventory.');
+      toast.error(e.message || 'Could not load inventory.');
     } finally {
       setLoading(false);
     }
@@ -48,24 +46,22 @@ export default function Inventory() {
   const createNew = async (form) => {
     try {
       await createInventory(form);
-      setNotice('Inventory item created.');
+      toast.success('Inventory item created.');
       setShowModal(false);
       await load();
     } catch (e) {
-      setError(e.message || 'Could not create item.');
-      throw e;
+      toast.error(e.message || 'Could not create item.');
     }
   };
 
   const editItem = async (id, form) => {
     try {
       await updateInventory(id, form);
-      setNotice('Item updated.');
+      toast.success('Item updated.');
       setModal(null);
       await load();
     } catch (e) {
-      setError(e.message || 'Could not update item.');
-      throw e;
+      toast.error(e.message || 'Could not update item.');
     }
   };
 
@@ -73,12 +69,11 @@ export default function Inventory() {
     try {
       if (type === 'in') await stockIn(id, form);
       else await stockOut(id, form);
-      setNotice(type === 'in' ? 'Stock added.' : 'Stock removed.');
+      toast.success(type === 'in' ? 'Stock added.' : 'Stock removed.');
       setModal(null);
       await load();
     } catch (e) {
-      setError(e.message || 'Stock transaction failed.');
-      throw e;
+      toast.error(e.message || 'Stock transaction failed.');
     }
   };
 
@@ -109,10 +104,6 @@ export default function Inventory() {
           <strong>Low-stock alert:</strong> {lowItems.length} item(s) at or below minimum stock.
         </div>
       )}
-
-      {notice && <div className="admin-notice">{notice}</div>}
-      {error && <div className="admin-error">{error}</div>}
-
       {loading ? (
         <div className="admin-loading">Loading inventory…</div>
       ) : items.length === 0 ? (
@@ -199,18 +190,31 @@ function ItemModal({ title, initial, onClose, onSubmit }) {
       : empty
   );
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const update = (f) => (e) => setForm((x) => ({ ...x, [f]: e.target.value }));
 
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true);
-    setErr('');
     try {
       await onSubmit(form);
-    } catch (err) {
-      setErr(err.message || 'Something went wrong.');
+    } finally {
       setBusy(false);
     }
   };
@@ -223,7 +227,6 @@ function ItemModal({ title, initial, onClose, onSubmit }) {
           <button type="button" className="modal-close" onClick={onClose} aria-label="Close">×</button>
         </div>
         <form className="admin-form" onSubmit={submit}>
-          {err && <div className="admin-error">{err}</div>}
           {!initial && (
             <div className="admin-field">
               <label>Item Code *</label>
@@ -266,22 +269,35 @@ function StockModal({ type, item, onClose, onSubmit }) {
   const [qty, setQty] = useState('');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true);
-    setErr('');
     const n = Number(qty);
     if (!n || n <= 0) {
-      setErr('Enter a valid quantity.');
+      toast.error('Enter a valid quantity.');
       setBusy(false);
       return;
     }
     try {
       await onSubmit({ quantity: n, note });
-    } catch (err) {
-      setErr(err.message || 'Stock transaction failed.');
+    } finally {
       setBusy(false);
     }
   };
@@ -297,7 +313,6 @@ function StockModal({ type, item, onClose, onSubmit }) {
           <p className="muted">
             {item.name} — current stock: <strong>{item.currentStock}</strong> {item.unit}
           </p>
-          {err && <div className="admin-error">{err}</div>}
           <div className="admin-field">
             <label>Quantity *</label>
             <input type="number" min="1" className="admin-input" value={qty} onChange={(e) => setQty(e.target.value)} required />

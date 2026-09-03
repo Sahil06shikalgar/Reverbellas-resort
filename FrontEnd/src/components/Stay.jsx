@@ -35,18 +35,38 @@ export default function Stay() {
     const ctx = gsap.context(() => {
       if (prefersReduced) return;
 
-      gsap.utils.toArray('.stay-feature-image').forEach((el) => {
-        gsap.fromTo(
-          el,
-          { clipPath: 'inset(0 100% 0 0)' },
-          {
-            clipPath: 'inset(0 0% 0 0)',
-            duration: 1.1,
-            ease: 'power4.inOut',
-            scrollTrigger: { trigger: el, start: 'top 88%' },
-          }
-        );
-      });
+      const mm = gsap.matchMedia();
+
+      // Subtle fade-up + tiny scale settle (vertical only, no horizontal/parallax)
+      const revealImages = (getOffset) => {
+        gsap.utils.toArray('.stay-feature-image').forEach((el, i) => {
+          gsap.fromTo(
+            el,
+            { opacity: 0, y: getOffset(i), scale: 1.02 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 1.1,
+              delay: i * 0.15,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: el,
+                start: 'top 82%',
+                toggleActions: 'play none none reverse',
+              },
+            }
+          );
+        });
+      };
+
+      // Desktop: left image y 36, right image y 46
+      mm.add('(min-width: 901px)', () =>
+        revealImages((i) => (i % 2 === 0 ? 36 : 46))
+      );
+
+      // Mobile: reduced offset
+      mm.add('(max-width: 900px)', () => revealImages(() => 24));
 
       gsap.utils.toArray('.stay-feature').forEach((el) => {
         gsap.fromTo(

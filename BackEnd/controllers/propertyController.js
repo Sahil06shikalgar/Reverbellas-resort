@@ -1,4 +1,8 @@
 import Property from "../models/Property.js";
+import {
+  searchAvailability,
+  getNights
+} from "../services/availabilityService.js";
 
 export const getProperties = async (
   req,
@@ -132,6 +136,52 @@ export const updateProperty = async (
       success: true,
       message: "Property updated",
       data: property
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAvailableProperties = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { checkIn, checkOut, adults = 1, children = 0 } = req.query;
+
+    if (!checkIn || !checkOut) {
+      return res.status(400).json({
+        success: false,
+        message: "Check-in and check-out are required"
+      });
+    }
+
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      end <= start
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid check-in and check-out dates are required"
+      });
+    }
+
+    const data = await searchAvailability({
+      checkIn,
+      checkOut,
+      adults,
+      children
+    });
+
+    res.json({
+      success: true,
+      count: data.availableProperties.length,
+      data
     });
   } catch (error) {
     next(error);

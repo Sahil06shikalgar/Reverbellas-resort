@@ -6,7 +6,7 @@ import BookingBar from './BookingBar';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Hero({ ready }) {
+export default function Hero({ ready, onSearch }) {
   const rootRef = useRef(null);
   const mediaRef = useRef(null);
   const videoRef = useRef(null);
@@ -103,7 +103,7 @@ export default function Hero({ ready }) {
         <span className="hero-scroll-label">Scroll</span>
       </div>
 
-      <BookingBar />
+      <BookingBar onSearch={onSearch} />
     </section>
   );
 }

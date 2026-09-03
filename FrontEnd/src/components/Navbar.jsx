@@ -9,8 +9,8 @@ const NAV_OFFSET = 90;
 
 const LINKS = [
   { label: 'Home', to: '/' },
-  { label: 'Gallery', to: '/stay#gallery' },
-  { label: 'Contact', to: '#booking-form' },
+  { label: 'Gallery', to: '/stay#accommodation' },
+  { label: 'Contact', to: '#contact' },
 ];
 
 function scrollToEl(selector) {

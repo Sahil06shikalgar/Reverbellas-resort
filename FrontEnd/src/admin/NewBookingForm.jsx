@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { createBooking } from '../services/bookingService';
 import { getProperties } from '../services/propertyService';
 
@@ -30,7 +31,6 @@ export default function NewBookingForm({ properties, onClose, onSaved }) {
   const [form, setForm] = useState(empty);
   const [allProperties, setAllProperties] = useState(properties || []);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!properties || properties.length === 0) {
@@ -40,7 +40,6 @@ export default function NewBookingForm({ properties, onClose, onSaved }) {
 
   const update = (field) => (e) => {
     setForm((f) => ({ ...f, [field]: e.target.value }));
-    setError('');
   };
 
   const onPropertyChange = (e) => {
@@ -51,17 +50,15 @@ export default function NewBookingForm({ properties, onClose, onSaved }) {
       propertyId: id,
       ratePerNight: prop ? (prop.standardWeekdayRate ?? 0) : '',
     }));
-    setError('');
   };
 
   const submit = async (e) => {
     e.preventDefault();
     if (form.checkIn && form.checkOut && form.checkOut <= form.checkIn) {
-      setError('Check-out date must be after check-in date.');
+      toast.error('Check-out date must be after check-in date.');
       return;
     }
     setSaving(true);
-    setError('');
     try {
       const payload = {
         customer: {
@@ -89,9 +86,10 @@ export default function NewBookingForm({ properties, onClose, onSaved }) {
         notes: form.notes,
       };
       await createBooking(payload);
+      toast.success('Booking created.');
       onSaved?.();
     } catch (err) {
-      setError(err.message || 'Could not create booking.');
+      toast.error(err.message || 'Could not create booking.');
       setSaving(false);
     }
   };
@@ -105,8 +103,6 @@ export default function NewBookingForm({ properties, onClose, onSaved }) {
           <h3>New Booking</h3>
           <button type="button" className="modal-close" onClick={onClose} aria-label="Close">×</button>
         </div>
-
-        {error && <div className="admin-error">{error}</div>}
 
         <form className="admin-form" onSubmit={submit}>
           <div className="admin-form-grid">
@@ -184,7 +180,7 @@ export default function NewBookingForm({ properties, onClose, onSaved }) {
               <input type="number" min="0" className="admin-input" value={form.discountValue} onChange={update('discountValue')} />
             </div>
             <div className="admin-field">
-              <label>Tax (₹)</label>
+              <label>GST Tax (₹)</label>
               <input type="number" min="0" className="admin-input" value={form.taxAmount} onChange={update('taxAmount')} />
             </div>
             <div className="admin-field">

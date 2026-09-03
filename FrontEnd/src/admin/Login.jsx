@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,7 +8,6 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   const { login } = useAuth();
@@ -18,17 +18,16 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail || !password) {
-      setError('Please enter your email and password.');
+      toast.error('Please enter your email and password.');
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setError('Please enter a valid email address.');
+      toast.error('Please enter a valid email address.');
       return;
     }
 
@@ -36,9 +35,10 @@ export default function Login() {
 
     try {
       await login(trimmedEmail, password);
+      toast.success('Signed in successfully.');
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      toast.error(err.message || 'Login failed. Please try again.');
     } finally {
       setBusy(false);
     }
@@ -92,8 +92,6 @@ export default function Login() {
               </button>
             </div>
           </div>
-
-          {error && <div className="form-error form-error-block admin-login-error" role="alert">{error}</div>}
 
           <button type="submit" className="admin-login-btn" disabled={busy}>
             {busy ? 'Signing in…' : 'Sign In'}

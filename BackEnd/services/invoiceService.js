@@ -179,7 +179,7 @@ export const buildInvoicePdfBuffer = async (invoiceData) => {
         ["Room Charges", formatINR(invoiceData.roomCharges)],
         ["Food & Service Charges", formatINR(invoiceData.servicesTotal)],
         ["Discount", `- ${formatINR(invoiceData.discount)}`],
-        ["Tax", formatINR(invoiceData.tax)],
+        ["GST Tax", formatINR(invoiceData.tax)],
         ["Other Charges", formatINR(invoiceData.otherCharges)]
       ];
 

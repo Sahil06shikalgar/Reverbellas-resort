@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { getBookings, getBookingById } from '../services/bookingService';
 import { addPayment, getBookingPayments } from '../services/paymentService';
+import { gstTaxLabel } from '../utils/billingLabels';
 
 const MODES = ['Cash', 'UPI', 'Google Pay', 'PhonePe', 'Card', 'Bank Transfer', 'Other'];
 const PTYPES = ['Advance', 'Partial', 'Final', 'Refund', 'Other'];
@@ -51,7 +53,6 @@ export default function Payments() {
   const [reference, setReference] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState('');
 
   const balance = billing?.balance ?? 0;
   const paidComplete = booking && balance <= 0;
@@ -60,7 +61,6 @@ export default function Payments() {
     if (!id) return;
     setLoading(true);
     setLoadError('');
-    setFormError('');
     setBooking(null);
     setBilling(null);
     setPayments([]);
@@ -79,6 +79,7 @@ export default function Payments() {
       setMode('Cash');
     } catch (e) {
       setLoadError(e.message || 'Could not load booking.');
+      toast.error(e.message || 'Could not load booking.');
     } finally {
       setLoading(false);
     }
@@ -94,11 +95,10 @@ export default function Payments() {
   const search = async () => {
     const term = searchRef.current.trim();
     if (!term) {
-      setFormError('Enter a booking ID, customer name or mobile number to search.');
+      toast.error('Enter a booking ID, customer name or mobile number to search.');
       return;
     }
     setSearching(true);
-    setFormError('');
     try {
       const r = await getBookings({ search: term });
       const list = r.data || [];
@@ -108,7 +108,7 @@ export default function Payments() {
         setResults([]);
       }
     } catch (e) {
-      setFormError(e.message || 'Search failed.');
+      toast.error(e.message || 'Search failed.');
     } finally {
       setSearching(false);
     }
@@ -120,7 +120,6 @@ export default function Payments() {
     setPayments([]);
     setResults([]);
     setLoadError('');
-    setFormError('');
     navigate('/admin/payments', { replace: true });
   };
 
@@ -146,24 +145,22 @@ export default function Payments() {
     if (balance <= 0) return;
     const val = Math.round((balance * pct) / 100);
     setAmount(String(val));
-    setFormError('');
   };
 
   const submit = async (e) => {
     e.preventDefault();
     if (!booking) return;
-    setFormError('');
 
     if (!Number.isFinite(numAmount) || numAmount <= 0) {
-      setFormError('Amount must be greater than 0.');
+      toast.error('Amount must be greater than 0.');
       return;
     }
     if (numAmount > balance) {
-      setFormError(`Payment cannot exceed the pending amount of ${inr(balance)}.`);
+      toast.error(`Payment cannot exceed the pending amount of ${inr(balance)}.`);
       return;
     }
     if (!mode) {
-      setFormError('Please select a payment mode.');
+      toast.error('Please select a payment mode.');
       return;
     }
 
@@ -187,11 +184,11 @@ export default function Payments() {
           },
         });
       } else {
-        setFormError(resp?.message || 'Payment could not be recorded.');
+        toast.error(resp?.message || 'Payment could not be recorded.');
         setSaving(false);
       }
     } catch (err) {
-      setFormError(err.message || 'Payment could not be recorded.');
+      toast.error(err.message || 'Payment could not be recorded.');
       setSaving(false);
     }
   };
@@ -243,8 +240,6 @@ export default function Payments() {
         </div>
       </div>
 
-      {formError && <div className="admin-error">{formError}</div>}
-      {loadError && <div className="admin-error">{loadError}</div>}
       {billMissing && (
         <div className="admin-error">Billing details could not be loaded. Totals are not shown.</div>
       )}
@@ -316,7 +311,7 @@ export default function Payments() {
                   <dl className="bp-billing">
                     <div className="bp-row"><dt>Stay Amount</dt><dd>{inr(billing.baseAmount)}</dd></div>
                     <div className="bp-row"><dt>Discount</dt><dd>-{inr(billing.discountAmount)}</dd></div>
-                    <div className="bp-row"><dt>Tax</dt><dd>{inr(billing.tax)}</dd></div>
+                    <div className="bp-row"><dt>{gstTaxLabel(billing)}</dt><dd>{inr(billing.tax)}</dd></div>
                     <div className="bp-row"><dt>Other Charges</dt><dd>{inr(billing.otherCharges)}</dd></div>
                     <div className="bp-row"><dt>Food / Service</dt><dd>{inr(billing.servicesTotal)}</dd></div>
                   </dl>
@@ -366,7 +361,7 @@ export default function Payments() {
                             key={m}
                             type="button"
                             className={`bp-mode ${mode === m ? 'active' : ''}`}
-                            onClick={() => { setMode(m); setFormError(''); }}
+                            onClick={() => { setMode(m); }}
                           >
                             {m}
                           </button>
@@ -385,7 +380,7 @@ export default function Payments() {
                           max={balance}
                           placeholder={String(balance || '')}
                           value={amount}
-                          onChange={(e) => { setAmount(e.target.value); setFormError(''); }}
+                          onChange={(e) => { setAmount(e.target.value); }}
                           className="bp-input"
                         />
                       </div>

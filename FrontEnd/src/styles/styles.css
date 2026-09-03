@@ -279,6 +279,7 @@ textarea:focus-visible {
 .section-head h2 {
   font-size: clamp(2.3rem, 5vw, 4rem);
   margin-top: 0.9rem;
+  color: white;
 }
 
 .visually-hidden {
@@ -2480,6 +2481,7 @@ textarea:focus-visible {
 
 .guest-stories {
   padding-top: clamp(25px, 3vw, 100px);
+  background-color:#132A20;
 }
 
 .guest-stories-grid {

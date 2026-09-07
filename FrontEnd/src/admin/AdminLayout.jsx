@@ -1,14 +1,24 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import {
+  CalendarDays,
+  ListChecks,
+  CreditCard,
+  Users,
+  Boxes,
+  Settings2,
+  FileText,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const NAV = [
-  { to: '/admin', label: 'Booking Calendar', end: true },
-  { to: '/admin/all-bookings', label: 'All Bookings' },
-  { to: '/admin/payments', label: 'Payments' },
-  { to: '/admin/customers', label: 'Customers' },
-  { to: '/admin/inventory', label: 'Inventory' },
-  { to: '/admin/properties', label: 'Property Settings' },
+  { to: '/admin', label: 'Booking Calendar', end: true, icon: CalendarDays },
+  { to: '/admin/all-bookings', label: 'All Bookings', icon: ListChecks },
+  { to: '/admin/payments', label: 'Payments', icon: CreditCard },
+  { to: '/admin/customers', label: 'Customers', icon: Users },
+  { to: '/admin/inventory', label: 'Inventory', icon: Boxes },
+  { to: '/admin/properties', label: 'Property Settings', icon: Settings2 },
+  { to: '/admin/blogs', label: 'Blogs', icon: FileText },
 ];
 
 export default function AdminLayout() {
@@ -44,6 +54,7 @@ export default function AdminLayout() {
               className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}
               onClick={() => setOpen(false)}
             >
+              <item.icon size={16} strokeWidth={1.75} aria-hidden="true" />
               {item.label}
             </NavLink>
           ))}

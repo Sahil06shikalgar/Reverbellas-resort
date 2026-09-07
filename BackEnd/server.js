@@ -17,6 +17,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import migrationRoutes from "./routes/migrationRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
@@ -83,6 +84,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/migration", migrationRoutes);
+app.use("/api/blogs", blogRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({

@@ -20,6 +20,10 @@ import PaymentSuccess from './admin/PaymentSuccess';
 import CustomerHistory from './admin/CustomerHistory';
 import Inventory from './admin/Inventory';
 import PropertySettings from './admin/PropertySettings';
+import AdminBlogs from './admin/AdminBlogs';
+import BlogEditor from './admin/BlogEditor';
+import Blogs from './pages/Blogs';
+import BlogDetail from './pages/BlogDetail';
 import useLenis from './hooks/useLenis';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -78,6 +82,8 @@ function AppRoutes({ ready }) {
       <Route path="/experiences" element={<Home ready={ready} />} />
       <Route path="/gallery" element={<Home ready={ready} />} />
       <Route path="/contact" element={<Home ready={ready} />} />
+      <Route path="/blogs" element={<Blogs />} />
+      <Route path="/blogs/:slug" element={<BlogDetail />} />
 
       <Route path="/admin/login" element={<Login />} />
 
@@ -89,6 +95,9 @@ function AppRoutes({ ready }) {
         <Route path="customers" element={<CustomerHistory />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="properties" element={<PropertySettings />} />
+        <Route path="blogs" element={<AdminBlogs />} />
+        <Route path="blogs/new" element={<BlogEditor mode="new" />} />
+        <Route path="blogs/:id/edit" element={<BlogEditor mode="edit" />} />
       </Route>
 
       <Route path="*" element={<Home ready={ready} />} />

@@ -10,6 +10,7 @@ const NAV_OFFSET = 90;
 const LINKS = [
   { label: 'Home', to: '/' },
   { label: 'Gallery', to: '/stay#accommodation' },
+  { label: 'Journal', to: '/blogs' },
   { label: 'Contact', to: '#contact' },
 ];
 

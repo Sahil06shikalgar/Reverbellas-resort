@@ -6,6 +6,7 @@ const NAV_OFFSET = 80;
 const LINKS = [
   { label: 'About', href: '#about' },
   { label: 'Gallery', href: '/stay#gallery' },
+  { label: 'Journal', href: '/blogs' },
   { label: 'Contact', href: '#booking-form' },
 ];
 

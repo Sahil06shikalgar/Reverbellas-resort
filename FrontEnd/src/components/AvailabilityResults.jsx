@@ -162,8 +162,15 @@ export default function AvailabilityResults({ result }) {
           <span className="eyebrow">AVAILABLE STAYS</span>
           <h2 className="avail-results-title">Choose your stay at Riverbells</h2>
           <p className="avail-results-meta">
-            {formatDateRange(checkIn, checkOut)} &nbsp;•&nbsp; {nights} {nights !== 1 ? 'Nights' : 'Night'} &nbsp;•&nbsp;{' '}
-            {totalGuests} Guest{totalGuests !== 1 ? 's' : ''}
+            <span className="avail-results-meta-item">{formatDateRange(checkIn, checkOut)}</span>
+            <span className="avail-results-meta-sep" aria-hidden="true">•</span>
+            <span className="avail-results-meta-item">
+              {nights} {nights !== 1 ? 'Nights' : 'Night'}
+            </span>
+            <span className="avail-results-meta-sep" aria-hidden="true">•</span>
+            <span className="avail-results-meta-item">
+              {totalGuests} Guest{totalGuests !== 1 ? 's' : ''}
+            </span>
           </p>
         </header>
 

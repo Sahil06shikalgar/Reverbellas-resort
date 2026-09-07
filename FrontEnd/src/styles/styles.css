@@ -927,7 +927,7 @@ textarea:focus-visible {
 
 .cinematic {
   position: relative;
-  height: 100vh;
+  height: min(100vh, 100svh);
   overflow: hidden;
   background: var(--color-dark);
   display: flex;
@@ -4168,6 +4168,7 @@ select.admin-input {
 
 .muted {
   color: rgba(22, 32, 25, 0.55);
+  margin-right: 10px;
 }
 
 /* Calendar */
@@ -5148,7 +5149,7 @@ select.admin-input {
 
 .guest-pay-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: 22px;
   align-items: start;
 }
@@ -5427,7 +5428,7 @@ select.admin-input {
 
 .bp-card {
   display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   max-width: 1180px;
   margin: 8px auto 26px;
   min-height: 650px;
@@ -5960,7 +5961,7 @@ select.bp-input {
 
 .pp-grid {
   display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: 22px;
   align-items: start;
 }
@@ -6314,6 +6315,17 @@ select.pp-input {
   font-size: 14px;
   letter-spacing: 0.04em;
   color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 2px;
+}
+
+.avail-results-meta-sep {
+  color: rgba(23, 60, 43, 0.32);
+  line-height: 1;
 }
 
 .avail-list {
@@ -6327,6 +6339,8 @@ select.pp-input {
   flex-direction: column;
   background: var(--white);
   border: 1px solid #E2DCD1;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .avail-card-media {
@@ -6971,4 +6985,234 @@ select.pp-input {
   }
 }
 
-  
+/* ========================================
+   RESPONSIVE HARDENING
+   Targeted, non-redesign fixes so every page stays clean
+   from 320px phones to 2560px monitors.
+   ======================================== */
+
+/* Embedded media must never force horizontal overflow */
+video,
+svg,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Lock background scroll while any modal or lightbox is open */
+body:has(.modal-overlay),
+body:has(.lightbox) {
+  overflow: hidden;
+}
+
+/* ---------- NAVBAR ---------- */
+@media (max-width: 1024px) {
+  .navbar-inner {
+    padding: 16px 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar-inner {
+    padding: 14px 18px;
+  }
+}
+
+/* Mobile menu must never be clipped on short / landscape viewports,
+   and must stay scrollable if content is taller than the screen */
+@media (max-width: 1024px) {
+  .navbar-mobile {
+    justify-content: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-top: clamp(92px, 16vh, 140px);
+    padding-bottom: 48px;
+  }
+  .navbar-mobile-links a {
+    padding: 0.24em 0;
+  }
+  .navbar-mobile-cta {
+    margin-top: 1.5rem;
+  }
+}
+
+/* ---------- /stay hero ---------- */
+@media (max-width: 640px) {
+  .stay-hero {
+    min-height: 54svh;
+    height: 54svh;
+  }
+  .stay-hero-content {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 5svh;
+    max-width: none;
+    padding-inline: clamp(1.25rem, 5vw, 2rem);
+  }
+  .stay-hero-heading {
+    font-size: clamp(38px, 11.5vw, 60px);
+  }
+  .stay-hero-content p {
+    max-width: 100%;
+    margin-top: 12px;
+    font-size: 0.92rem;
+    letter-spacing: 2px;
+  }
+  .stay-hero-content .eyebrow {
+    margin-bottom: 0.7rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .stay-hero {
+    min-height: 52svh;
+    height: 52svh;
+  }
+  .stay-hero-heading {
+    font-size: clamp(32px, 12vw, 44px);
+  }
+}
+
+/* ---------- BOOKING BAR mid-range (901–1100px) ---------- */
+@media (max-width: 1100px) and (min-width: 901px) {
+  .booking-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .booking-submit {
+    width: 100%;
+    min-width: 0;
+    min-height: 64px;
+  }
+}
+
+/* ---------- DINING (single column under 640px) ---------- */
+@media (max-width: 640px) {
+  .dining-menu {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- LIGHTBOX on phones ---------- */
+@media (max-width: 560px) {
+  .lightbox {
+    padding: 3rem 0.75rem;
+  }
+  .lightbox-close {
+    top: 1rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+  }
+  .lightbox-frame {
+    max-height: 72vh;
+  }
+}
+
+/* ---------- AVAILABILITY CARD on small phones ---------- */
+@media (max-width: 480px) {
+  .avail-card-name {
+    font-size: 24px;
+  }
+}
+
+/* ---------- MODALS (screen only; print rules untouched) ---------- */
+@media screen {
+  .modal-box {
+    max-height: max(60vh, calc(100dvh - 40px));
+    overscroll-behavior: contain;
+  }
+  .invoice-modal {
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 16px;
+  }
+  .modal-box,
+  .invoice-modal {
+    width: 100%;
+    max-width: none;
+    padding: 16px;
+  }
+  .modal-close {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+  .invoice-meta {
+    text-align: left;
+  }
+  .invoice-head h2 {
+    font-size: 24px;
+  }
+  .invoice-table {
+    font-size: 12px;
+  }
+  .invoice-table th,
+  .invoice-table td {
+    padding: 8px 6px;
+  }
+}
+
+/* ---------- ADMIN ---------- */
+@media (max-width: 900px) {
+  .admin-sidebar {
+    height: 100dvh;
+  }
+  .admin-main {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ---------- TOUCH TARGETS / small text safety ---------- */
+@media (max-width: 360px) {
+  .btn {
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* ---------- BOOKING BAR — compact mobile (overrides ≤640 single-col) ---------- */
+@media (max-width: 700px) {
+  .booking-bar {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px;
+    gap: 10px;
+  }
+  .booking-field {
+    padding: 10px 14px;
+  }
+  .booking-field label {
+    margin-bottom: 4px;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+  }
+  .booking-field input,
+  .booking-field select {
+    font-size: 15px;
+  }
+  .booking-field input[type='number'] {
+    font-size: 15px;
+  }
+  .booking-submit {
+    min-height: 48px;
+    min-width: 0;
+    font-size: 13px;
+    padding: 0 14px;
+  }
+}
+
+/* ---------- AVAILABILITY META — phone-safe wrapping ---------- */
+@media (max-width: 420px) {
+  .avail-results-meta {
+    font-size: 12px;
+    gap: 2px 8px;
+  }
+}
+

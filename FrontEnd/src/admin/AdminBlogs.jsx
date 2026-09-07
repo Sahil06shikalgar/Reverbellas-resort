@@ -128,40 +128,40 @@ export default function AdminBlogs() {
           {search || status ? 'No blogs match your search.' : 'No blogs yet. Create your first post.'}
         </div>
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
+        <div className="blog-table-wrapper">
+          <table className="admin-table blog-admin-table">
             <thead>
               <tr>
                 <th>Featured Image</th>
                 <th>Title</th>
                 <th>Category</th>
-                <th>Author</th>
+                <th className="col-author">Author</th>
                 <th>Status</th>
                 <th>Published</th>
-                <th>Updated</th>
+                <th className="col-updated">Updated</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {blogs.map((b) => (
-                <tr key={b._id}>
-                  <td>
-                    <img className="admin-thumb" src={resolveBlogImage(b.featuredImage)} alt="" />
+                <tr key={b._id} className="blog-admin-row">
+                  <td data-label="Featured Image">
+                    <img className="admin-thumb blog-admin-thumb" src={resolveBlogImage(b.featuredImage)} alt="" />
                   </td>
-                  <td>
+                  <td className="blog-title-cell" data-label="Title">
                     <strong className="admin-blog-title">{b.title}</strong>
                     <span className="admin-blog-slug">/{b.slug}</span>
                   </td>
-                  <td>{b.category}</td>
-                  <td>{b.author}</td>
-                  <td>
+                  <td data-label="Category">{b.category}</td>
+                  <td className="col-author" data-label="Author">{b.author}</td>
+                  <td data-label="Status">
                     <span className={`blog-badge ${b.status === 'published' ? 'published' : 'draft'}`}>
                       {b.status === 'published' ? 'Published' : 'Draft'}
                     </span>
                   </td>
-                  <td>{fmtDate(b.publishedAt)}</td>
-                  <td>{fmtDate(b.updatedAt)}</td>
-                  <td className="row-actions">
+                  <td data-label="Published">{fmtDate(b.publishedAt)}</td>
+                  <td className="col-updated" data-label="Updated">{fmtDate(b.updatedAt)}</td>
+                  <td className="row-actions blog-row-actions" data-label="Actions">
                     <button type="button" className="admin-btn tiny ghost" onClick={() => openPublic(b.slug)}>View</button>
                     <button type="button" className="admin-btn tiny" onClick={() => navigate(`/admin/blogs/${b._id}/edit`)}>Edit</button>
                     <button type="button" className="admin-btn tiny" disabled={busyId === b._id} onClick={() => runToggle(b._id)}>

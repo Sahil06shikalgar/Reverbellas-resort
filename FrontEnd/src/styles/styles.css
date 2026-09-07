@@ -7178,33 +7178,64 @@ body:has(.lightbox) {
   }
 }
 
-/* ---------- BOOKING BAR — compact mobile (overrides ≤640 single-col) ---------- */
-@media (max-width: 700px) {
+/* ---------- BOOKING BAR — stacked mobile card (<768px) ----------
+   Vertically stacks Check-In, Check-Out, Guests, then the button.
+   16px safe margins, 12px gaps, >=48px touch targets.
+   No display:none / clipping used — the hero grows to fit the card. */
+@media (max-width: 767px) {
+  .hero {
+    padding-bottom: clamp(2rem, 10vh, 3.5rem);
+  }
+
+  .booking-bar-wrap {
+    width: 100%;
+    padding-inline: 16px;
+    margin: 2rem auto 0;
+  }
+
   .booking-bar {
-    grid-template-columns: 1fr 1fr;
-    padding: 12px;
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+    width: 100%;
+    margin: 0;
+    padding: 16px;
+    gap: 12px;
+    border-radius: 14px;
+    box-shadow: 0 20px 46px rgba(6, 15, 10, 0.35);
   }
+
   .booking-field {
-    padding: 10px 14px;
+    width: 100%;
+    min-height: 60px;
+    padding: 8px 16px 10px;
+    justify-content: center;
   }
+
   .booking-field label {
     margin-bottom: 4px;
-    font-size: 9px;
-    letter-spacing: 0.14em;
+    font-size: 10px;
+    letter-spacing: 0.16em;
   }
+
   .booking-field input,
   .booking-field select {
-    font-size: 15px;
+    height: 48px;
+    min-height: 0;
+    font-size: 16px;
   }
+
   .booking-field input[type='number'] {
-    font-size: 15px;
+    font-size: 16px;
   }
+
   .booking-submit {
-    min-height: 48px;
+    width: 100%;
     min-width: 0;
-    font-size: 13px;
-    padding: 0 14px;
+    min-height: 52px;
+    height: auto;
+    font-size: 14px;
+    padding: 0 16px;
   }
 }
 

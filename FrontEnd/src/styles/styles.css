@@ -7470,3 +7470,41 @@ body:has(.lightbox) {
   }
 }
 
+/* ========================================
+   BOOKING BAR WIDTH + TABLET LAYOUT (768-1024)
+   Bar spans min(100% - 32px, 1100px); tablet keeps a
+   two-column grid with the button spanning the full row.
+   ======================================== */
+@media (max-width: 1024px) {
+  .booking-bar-wrap {
+    width: 100%;
+    padding-inline: 16px;
+    margin: 2.5rem auto 0;
+  }
+
+  .booking-bar {
+    width: 100%;
+    margin-inline: 0;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .booking-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .booking-bar > * {
+    min-width: 0;
+  }
+
+  .booking-submit {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    min-height: 56px;
+    height: auto;
+    justify-content: center;
+  }
+}
+

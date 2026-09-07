@@ -3247,6 +3247,50 @@ html, body, #root {
   color: #294B3A;
 }
 
+/* ========================================
+   NAVBAR LIGHT VARIANT — for light/cream pages
+   (applied via <Navbar variant="light" />)
+   Only text colors change; layout, sizes, logo,
+   routes, and the Book Your Stay button are untouched.
+   ======================================== */
+.navbar--light .brand-name,
+.navbar--light.is-scrolled .brand-name {
+  color: #111111;
+}
+
+.navbar--light .brand-location,
+.navbar--light.is-scrolled .brand-location {
+  color: rgba(17, 17, 17, 0.58);
+}
+
+.navbar--light .navbar-links a,
+.navbar--light.is-scrolled .navbar-links a {
+  color: #111111;
+}
+
+.navbar--light .navbar-links a:hover,
+.navbar--light.is-scrolled .navbar-links a:hover,
+.navbar--light .navbar-links a.active,
+.navbar--light.is-scrolled .navbar-links a.active {
+  color: #B79255;
+}
+
+.navbar--light .navbar-burger,
+.navbar--light.is-scrolled .navbar-burger {
+  color: #111111;
+}
+
+/* Book Your Stay CTA — keep existing green button (never black); gold on hover */
+.navbar--light .navbar-cta::before {
+  background: #B79255;
+}
+
+.navbar--light .navbar-cta,
+.navbar--light.is-scrolled .navbar-cta {
+  background: #24533E;
+  color: #FFFFFF;
+}
+
 .book-stay-page .navbar.is-scrolled .navbar-burger {
   color: #294B3A;
 }

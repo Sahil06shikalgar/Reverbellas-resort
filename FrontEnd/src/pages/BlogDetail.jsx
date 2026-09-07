@@ -60,7 +60,7 @@ export default function BlogDetail() {
 
   return (
     <>
-      <Navbar />
+      <Navbar variant="light" />
       <section className="section journal-article">
         <div className="container journal-article-inner">
           {loading ? (

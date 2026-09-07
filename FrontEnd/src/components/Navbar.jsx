@@ -25,7 +25,7 @@ function scrollToEl(selector) {
   }
 }
 
-export default function Navbar() {
+export default function Navbar({ variant }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -94,7 +94,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className={`navbar ${scrolled ? 'is-scrolled' : ''} ${menuOpen ? 'menu-open' : ''}`}>
+    <header className={`navbar ${variant === 'light' ? 'navbar--light' : ''} ${scrolled ? 'is-scrolled' : ''} ${menuOpen ? 'menu-open' : ''}`}>
       <div className="navbar-inner">
         <a href="/" className="navbar-logo" onClick={(e) => handleNav(e, { to: '/' })}>
           <img src={logo} alt="Riverbells Resort" className="navbar-logo-img" />

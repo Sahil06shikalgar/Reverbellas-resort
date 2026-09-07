@@ -49,6 +49,14 @@ const bookingSchema = new mongoose.Schema(
       unique: true
     },
 
+    // Unguessable token that lets the guest who created this booking view it
+    // and record a payment without an account. select:false keeps it out of
+    // list/populate responses so it is only ever returned at creation time.
+    accessToken: {
+      type: String,
+      select: false
+    },
+
     customer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",

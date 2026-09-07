@@ -11,6 +11,13 @@ export const seedAdmin = async () => {
   const adminEmail = (process.env.ADMIN_EMAIL || "admin@riverbells.com").toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
 
+  // Never seed the well-known default password in production.
+  if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) {
+    throw new Error(
+      "ADMIN_PASSWORD is not set. Refusing to seed a default admin password in production."
+    );
+  }
+
   await User.create({
     name: "Riverbells Admin",
     email: adminEmail,

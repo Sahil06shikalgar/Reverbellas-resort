@@ -1,4 +1,5 @@
 import request from "./api";
+import { getBookingToken, saveBookingToken } from "./bookingAccess";
 
 export const getBookings = async (params = {}) => {
   const query = new URLSearchParams();
@@ -22,15 +23,31 @@ export const getBookings = async (params = {}) => {
   );
 };
 
-export const getBookingById = async (id) => {
-  return request(`/bookings/${id}`);
+export const getBookingById = async (id, accessToken) => {
+  // Staff callers authenticate with their JWT (added automatically in api.js).
+  // Guest callers pass the booking accessToken, or we fall back to the token
+  // saved when the booking was created.
+  const token = accessToken || getBookingToken(id);
+  return request(`/bookings/${id}`, {
+    headers: token ? { "x-booking-token": token } : {},
+  });
 };
 
 export const createBooking = async (bookingData) => {
-  return request("/bookings", {
+  const response = await request("/bookings", {
     method: "POST",
     body: JSON.stringify(bookingData),
   });
+
+  // Persist the one-time access token so the guest can view billing and pay
+  // on the subsequent pages without an account.
+  const bookingId = response?.data?._id;
+  const accessToken = response?.data?.accessToken;
+  if (bookingId && accessToken) {
+    saveBookingToken(bookingId, accessToken);
+  }
+
+  return response;
 };
 
 export const changeBookingStatus = async (id, status) => {

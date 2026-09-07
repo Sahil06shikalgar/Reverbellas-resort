@@ -24,9 +24,14 @@ export const addPayment = async (
       reference = "",
       paymentType = "Partial",
       paymentDate,
-      notes = "",
-      status = "completed"
+      notes = ""
     } = req.body;
+
+    // Payment status is server-controlled. A client (especially the public
+    // guest payment page) must never be able to declare a payment "completed"
+    // or "pending" on its own, since that directly drives the balance and the
+    // ability to check out.
+    const status = "completed";
 
     const booking =
       await Booking.findById(bookingId);
@@ -38,17 +43,19 @@ export const addPayment = async (
       });
     }
 
-    if (Number(amount) <= 0) {
+    const numericAmount = Number(amount);
+
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Payment amount must be greater than 0"
+        message: "Payment amount must be a number greater than 0"
       });
     }
 
     const before =
       await calculateBookingFinancials(booking);
 
-    if (Number(amount) > before.balance) {
+    if (numericAmount > before.balance) {
       return res.status(400).json({
         success: false,
         message:
@@ -62,7 +69,7 @@ export const addPayment = async (
           await generatePaymentCode(),
 
         booking: bookingId,
-        amount,
+        amount: numericAmount,
         mode,
         reference,
         paymentType,

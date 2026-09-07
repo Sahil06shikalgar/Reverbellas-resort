@@ -52,10 +52,14 @@ export const calculateBookingFinancials = async (booking) => {
     booking: booking._id
   });
 
-  const totalPaid = payments.reduce(
-    (sum, payment) => sum + Number(payment.amount || 0),
-    0
-  );
+  // Only payments that have actually been collected count toward the balance.
+  // Pending or cancelled rows must never let a booking check out on money that
+  // was not received. Refunds reduce the collected total.
+  const totalPaid = payments.reduce((sum, payment) => {
+    if (payment.status !== "completed") return sum;
+    const amount = Number(payment.amount || 0);
+    return payment.paymentType === "Refund" ? sum - amount : sum + amount;
+  }, 0);
 
   const balance = Math.max(
     0,

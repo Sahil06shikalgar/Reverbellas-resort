@@ -12,6 +12,8 @@ import {
   calculateBookingFinancials
 } from "../services/billingService.js";
 
+import { generateBookingAccessToken } from "../utils/bookingAccess.js";
+
 const generateBookingCode = async () => {
   const count = await Booking.countDocuments();
 
@@ -55,6 +57,40 @@ export const createBooking = async (req, res, next) => {
       });
     }
 
+    const adultsCount = Number(adults);
+    const childrenCount = Number(children);
+
+    if (!Number.isInteger(adultsCount) || adultsCount < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "At least 1 adult is required"
+      });
+    }
+
+    if (!Number.isInteger(childrenCount) || childrenCount < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Number of children cannot be negative"
+      });
+    }
+
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    if (Number.isNaN(checkInDate.getTime()) || Number.isNaN(checkOutDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid check-in or check-out date"
+      });
+    }
+
+    if (checkOutDate <= checkInDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Checkout must be after check-in"
+      });
+    }
+
     const property =
       await Property.findById(propertyId);
 
@@ -67,8 +103,8 @@ export const createBooking = async (req, res, next) => {
 
     const capacityResult = await checkCapacity({
       propertyId,
-      adults,
-      children
+      adults: adultsCount,
+      children: childrenCount
     });
 
     if (!capacityResult.valid) {
@@ -153,9 +189,13 @@ export const createBooking = async (req, res, next) => {
     discountAmount =
       Math.min(discountAmount, baseAmount);
 
+    const accessToken = generateBookingAccessToken();
+
     const booking = await Booking.create({
       bookingCode:
         await generateBookingCode(),
+
+      accessToken,
 
       customer: existingCustomer._id,
 
@@ -164,8 +204,8 @@ export const createBooking = async (req, res, next) => {
       checkIn,
       checkOut,
 
-      adults,
-      children,
+      adults: adultsCount,
+      children: childrenCount,
 
       source,
       contactChannel,
@@ -202,7 +242,10 @@ export const createBooking = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: "Booking created successfully",
-      data: populated
+      // accessToken is returned only here, at creation, so the guest can view
+      // and pay for this booking without an account. It is never included in
+      // any subsequent list/detail response.
+      data: { ...populated.toObject(), accessToken }
     });
   } catch (error) {
     next(error);
@@ -227,39 +270,34 @@ export const getBookings = async (req, res, next) => {
       query.property = property;
     }
 
-    let bookings = await Booking.find(query)
+    if (search) {
+      const term = String(search).trim();
+
+      // Escape regex metacharacters so user input is treated literally.
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const rx = new RegExp(escaped, "i");
+
+      // Resolve related customer/property ids up front so the whole search
+      // runs as a single indexed query instead of loading every booking into
+      // memory and filtering in JS.
+      const [matchingCustomers, matchingProperties] = await Promise.all([
+        Customer.find({
+          $or: [{ name: rx }, { mobile: rx }, { email: rx }]
+        }).select("_id"),
+        Property.find({ name: rx }).select("_id")
+      ]);
+
+      query.$or = [
+        { bookingCode: rx },
+        { customer: { $in: matchingCustomers.map((c) => c._id) } },
+        { property: { $in: matchingProperties.map((p) => p._id) } }
+      ];
+    }
+
+    const bookings = await Booking.find(query)
       .populate("customer")
       .populate("property")
       .sort({ createdAt: -1 });
-
-    if (search) {
-      const term =
-        search.toLowerCase();
-
-      bookings = bookings.filter((booking) => {
-        return (
-          booking.bookingCode
-            .toLowerCase()
-            .includes(term) ||
-
-          booking.customer?.name
-            ?.toLowerCase()
-            .includes(term) ||
-
-          booking.customer?.mobile
-            ?.toLowerCase()
-            .includes(term) ||
-
-          booking.customer?.email
-            ?.toLowerCase()
-            .includes(term) ||
-
-          booking.property?.name
-            ?.toLowerCase()
-            .includes(term)
-        );
-      });
-    }
 
     res.json({
       success: true,

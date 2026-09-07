@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { JWT_SECRET } from "../config/env.js";
 
 export const protect = async (req, res, next) => {
   let token;
@@ -19,10 +20,7 @@ export const protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "riverbells_dev_secret"
-    );
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     const user = await User.findById(decoded.id).select("-password");
 

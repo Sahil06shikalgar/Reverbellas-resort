@@ -1,5 +1,4 @@
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const TOKEN_KEY = "riverbells_token";
 
@@ -12,16 +11,32 @@ export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
 
 const request = async (endpoint, options = {}) => {
   const token = getToken();
+  const url = `${API_URL}${endpoint}`;
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
+  let response;
 
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+  try {
+    response = await fetch(url, {
+      ...options,
+
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+  } catch (networkError) {
+    console.error(`[API] Network error ${options.method || "GET"} ${url}`, {
+      requestUrl: url,
+      reason: networkError.message || "Failed to fetch",
+    });
+    const error = new Error(
+      `Network error reaching ${url}. Check your connection and the API URL.`
+    );
+    error.status = 0;
+    error.requestUrl = url;
+    throw error;
+  }
 
   let data;
 
@@ -32,11 +47,18 @@ const request = async (endpoint, options = {}) => {
   }
 
   if (!response.ok) {
+    console.error(`[API] ${options.method || "GET"} ${url} -> ${response.status}`, {
+      requestUrl: url,
+      status: response.status,
+      apiError: data?.message || "",
+      code: data?.code || "",
+    });
     const error = new Error(
       data?.message || `Request failed with status ${response.status}`
     );
     error.status = response.status;
     error.code = data?.code || "";
+    error.requestUrl = url;
     throw error;
   }
 

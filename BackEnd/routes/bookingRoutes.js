@@ -13,6 +13,7 @@ import {
 } from "../controllers/bookingController.js";
 import { validateObjectId } from "../utils/validateObjectId.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { requireBookingAccess } from "../utils/bookingAccess.js";
 import { addPayment, getBookingPayments } from "../controllers/paymentController.js";
 
 const router = express.Router();
@@ -20,18 +21,20 @@ const router = express.Router();
 router.get("/", protect, getBookings);
 router.post("/", createBooking);
 
-// Public booking-details + payment routes so a guest can pay right after booking.
-router.get("/:id/payments", validateObjectId, (req, res, next) => {
+// Guest booking-details + payment routes so a guest can pay right after
+// booking. These are not public: the caller must present either a staff JWT
+// or the booking's accessToken (returned when the booking was created).
+router.get("/:id/payments", validateObjectId, requireBookingAccess, (req, res, next) => {
   req.params.bookingId = req.params.id;
   getBookingPayments(req, res, next);
 });
 
-router.post("/:id/payments", validateObjectId, (req, res, next) => {
+router.post("/:id/payments", validateObjectId, requireBookingAccess, (req, res, next) => {
   req.body.bookingId = req.params.id;
   addPayment(req, res, next);
 });
 
-router.get("/:id", validateObjectId, getBookingById);
+router.get("/:id", validateObjectId, requireBookingAccess, getBookingById);
 router.put("/:id", validateObjectId, protect, updateBooking);
 
 router.get("/:id/billing", validateObjectId, protect, getBilling);

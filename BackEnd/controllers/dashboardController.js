@@ -52,10 +52,20 @@ export const dashboardSummary = async (req, res, next) => {
       status: { $in: ["inquiry", "confirmed", "checked_in"] }
     });
 
+    // Refunds reduce the collected total, matching billingService so the
+    // dashboard and the per-booking billing never disagree.
+    const collectedFor = (list) =>
+      list.reduce((s, p) => {
+        const amount = Number(p.amount || 0);
+        return p.paymentType === "Refund" ? s - amount : s + amount;
+      }, 0);
+
     for (const booking of activeBookingsList) {
-      const paid = payments
-        .filter((p) => p.booking.toString() === booking._id.toString())
-        .reduce((s, p) => s + Number(p.amount || 0), 0);
+      const paid = collectedFor(
+        payments.filter(
+          (p) => p.booking.toString() === booking._id.toString()
+        )
+      );
       const pricing = booking.pricing || {};
       const base = Number(pricing.baseAmount || 0);
       const discount = Math.min(
@@ -76,17 +86,13 @@ export const dashboardSummary = async (req, res, next) => {
 
     const pendingTotal = pendingPayments.reduce((s, v) => s + v, 0);
 
-    const todayRevenue = payments
-      .filter(
-        (p) =>
-          p.paymentDate >= today && p.paymentDate < tomorrow
+    const todayRevenue = collectedFor(
+      payments.filter(
+        (p) => p.paymentDate >= today && p.paymentDate < tomorrow
       )
-      .reduce((s, p) => s + Number(p.amount || 0), 0);
-
-    const monthlyRevenue = monthPayments.reduce(
-      (s, p) => s + Number(p.amount || 0),
-      0
     );
+
+    const monthlyRevenue = collectedFor(monthPayments);
 
     const [allProperties, lowStockItems] = await Promise.all([
       Property.find({ active: true }),
@@ -143,7 +149,9 @@ export const dashboardRevenue = async (req, res, next) => {
 
     for (const p of payments) {
       const key = p.paymentDate.toISOString().slice(0, 10);
-      grouped[key] = (grouped[key] || 0) + Number(p.amount || 0);
+      const amount = Number(p.amount || 0);
+      const signed = p.paymentType === "Refund" ? -amount : amount;
+      grouped[key] = (grouped[key] || 0) + signed;
     }
 
     const data = Object.entries(grouped)

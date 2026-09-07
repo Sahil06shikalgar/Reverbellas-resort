@@ -2,6 +2,13 @@ import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Calendar, ChevronDown } from 'lucide-react';
+import DateRangePicker from './DateRangePicker';
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const date = new Date(`${iso}T00:00:00`);
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+};
 
 export default function BookingBar({ onSearch }) {
   const [form, setForm] = useState({
@@ -9,10 +16,12 @@ export default function BookingBar({ onSearch }) {
     checkOut: '',
     guests: '2',
   });
+  const [calOpen, setCalOpen] = useState(false);
+  const [calField, setCalField] = useState('checkIn');
   const navigate = useNavigate();
 
-  const checkInRef = useRef(null);
-  const checkOutRef = useRef(null);
+  const checkInFieldRef = useRef(null);
+  const checkOutFieldRef = useRef(null);
 
   const todayIso = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -20,34 +29,25 @@ export default function BookingBar({ onSearch }) {
     setForm((f) => ({ ...f, [field]: e.target.value }));
   };
 
-  const handleCheckInChange = (value) => {
-    if (value && value < todayIso) {
-      toast.error('Check-in date cannot be in the past.');
-      return;
-    }
-    setForm((f) => ({ ...f, checkIn: value }));
-    if (value && form.checkOut && new Date(form.checkOut) <= new Date(value)) {
-      setForm((f) => ({ ...f, checkOut: '' }));
-      toast.warning('Please select a new check-out date.');
-    }
-  };
-
-  const handleCheckOutChange = (value) => {
-    if (value && form.checkIn && new Date(value) <= new Date(form.checkIn)) {
-      setForm((f) => ({ ...f, checkOut: '' }));
-      toast.error('Check-out date must be after check-in.');
-      return;
-    }
-    setForm((f) => ({ ...f, checkOut: value }));
-  };
-
   const openDatePicker = (field) => {
-    const ref = field === 'checkIn' ? checkInRef : checkOutRef;
-    if (ref.current?.showPicker) {
-      ref.current.showPicker();
-    } else {
-      ref.current?.focus();
-    }
+    setCalField(field);
+    setCalOpen(true);
+  };
+
+  const applyDates = ({ checkIn = null, checkOut = null }) => {
+    setForm((f) => {
+      const next = { ...f };
+      if (checkIn) {
+        if (checkIn < todayIso) return f;
+        next.checkIn = checkIn;
+        if (next.checkOut && next.checkOut <= checkIn) next.checkOut = '';
+      }
+      if (checkOut) {
+        if (next.checkIn && checkOut <= next.checkIn) return f;
+        next.checkOut = checkOut;
+      }
+      return next;
+    });
   };
 
   const handleCheck = (e) => {
@@ -85,33 +85,37 @@ export default function BookingBar({ onSearch }) {
   return (
     <section className="booking-bar-wrap" id="booking-bar">
       <form className="booking-bar" onSubmit={handleCheck}>
-        <div className="booking-field">
+        <div className="booking-field" ref={checkInFieldRef} onClick={() => openDatePicker('checkIn')}>
           <label htmlFor="booking-check-in">Check-In</label>
-          <div className="bb-input-icon" onClick={() => openDatePicker('checkIn')}>
+          <div className="bb-input-icon">
             <input
-              ref={checkInRef}
               id="booking-check-in"
               name="checkIn"
-              type="date"
-              min={todayIso}
-              value={form.checkIn}
-              onChange={(e) => handleCheckInChange(e.target.value)}
+              type="text"
+              readOnly
+              value={formatDate(form.checkIn)}
+              placeholder="Select date"
+              autoComplete="off"
+              aria-haspopup="dialog"
+              aria-expanded={calOpen && calField === 'checkIn'}
             />
             <Calendar size={20} strokeWidth={1.5} aria-hidden="true" />
           </div>
         </div>
 
-        <div className="booking-field">
+        <div className="booking-field" ref={checkOutFieldRef} onClick={() => openDatePicker('checkOut')}>
           <label htmlFor="booking-check-out">Check-Out</label>
-          <div className="bb-input-icon" onClick={() => openDatePicker('checkOut')}>
+          <div className="bb-input-icon">
             <input
-              ref={checkOutRef}
               id="booking-check-out"
               name="checkOut"
-              type="date"
-              min={form.checkIn || todayIso}
-              value={form.checkOut}
-              onChange={(e) => handleCheckOutChange(e.target.value)}
+              type="text"
+              readOnly
+              value={formatDate(form.checkOut)}
+              placeholder="Select date"
+              autoComplete="off"
+              aria-haspopup="dialog"
+              aria-expanded={calOpen && calField === 'checkOut'}
             />
             <Calendar size={20} strokeWidth={1.5} aria-hidden="true" />
           </div>
@@ -137,6 +141,16 @@ export default function BookingBar({ onSearch }) {
           <span className="btn-arrow" aria-hidden="true">↗</span>
         </button>
       </form>
+
+      <DateRangePicker
+        open={calOpen}
+        field={calField}
+        anchorEl={calField === 'checkIn' ? checkInFieldRef : checkOutFieldRef}
+        checkIn={form.checkIn}
+        checkOut={form.checkOut}
+        onChange={applyDates}
+        onClose={() => setCalOpen(false)}
+      />
     </section>
   );
 }

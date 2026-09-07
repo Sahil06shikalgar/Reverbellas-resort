@@ -7216,3 +7216,226 @@ body:has(.lightbox) {
   }
 }
 
+/* ========================================
+   MOBILE HEADER — centered brand group, detached burger
+   ======================================== */
+@media (max-width: 1024px) {
+  .navbar-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-template-columns: none;
+    width: 100%;
+    column-gap: 0;
+    min-height: 64px;
+    padding: 8px 56px;
+  }
+
+  .navbar-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .navbar-logo-img {
+    width: clamp(38px, 11vw, 48px);
+    height: clamp(38px, 11vw, 48px);
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .brand-text {
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .brand-name {
+    font-size: clamp(16px, 4.8vw, 21px);
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .navbar-burger {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    justify-self: auto;
+  }
+}
+
+/* Brand location line only has room from ~561px up; hide on phones so the
+   centered brand group can never touch the burger or screen edges */
+@media (max-width: 520px) {
+  .navbar-logo .brand-location {
+    display: none;
+  }
+}
+
+/* ========================================
+   BOOKING BAR — custom date-range picker
+   ======================================== */
+.bb-cal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 195;
+  background: rgba(6, 15, 10, 0.45);
+  cursor: default;
+}
+
+.bb-cal {
+  position: fixed;
+  z-index: 200;
+  width: min(calc(100vw - 24px), 360px);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #FFF9EC;
+  color: #173C2B;
+  border: 1px solid rgba(23, 60, 43, 0.18);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(6, 15, 10, 0.4);
+  padding: 14px;
+  font-family: var(--font-body);
+}
+
+.bb-cal-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.bb-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 10px;
+}
+
+.bb-cal-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #173C2B;
+  white-space: nowrap;
+}
+
+.bb-cal-nav {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: #173C2B;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.bb-cal-nav:not(:disabled):active {
+  background: rgba(23, 60, 43, 0.1);
+}
+
+.bb-cal-nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.bb-cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding-bottom: 6px;
+}
+
+.bb-cal-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6F756F;
+  padding: 4px 0;
+}
+
+.bb-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.bb-cal-cell {
+  padding: 2px;
+}
+
+.bb-cal-day {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: #173C2B;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.bb-cal-day:disabled {
+  color: rgba(23, 60, 43, 0.28);
+  cursor: default;
+}
+
+.bb-cal-day:not(:disabled):hover {
+  background: rgba(183, 146, 85, 0.2);
+}
+
+.bb-cal-cell.bb-cal-range .bb-cal-day {
+  background: rgba(183, 146, 85, 0.24);
+  border-radius: 0;
+}
+
+.bb-cal-cell.bb-cal-range-start .bb-cal-day {
+  background: #B79255;
+  color: #FFFFFF;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.bb-cal-cell.bb-cal-range-end .bb-cal-day {
+  background: #2A513F;
+  color: #FFFFFF;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* Re-centers the date-range picker as a modal on small screens; JS anchors it
+   to the tapped input on larger viewports (>= 561px) */
+@media (max-width: 560px) {
+  .bb-cal {
+    padding: 12px;
+  }
+  .bb-cal-day {
+    height: 44px;
+    font-size: 16px;
+  }
+}
+

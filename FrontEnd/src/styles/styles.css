@@ -1197,6 +1197,56 @@ textarea:focus-visible {
   border-top: 1px solid rgba(25, 45, 35, 0.14);
 }
 
+/* Amenities + media preview layout (list | preview) */
+.amenities-media {
+  margin-top: clamp(2.625rem, 3.4vw, 3.4375rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  column-gap: clamp(2.5rem, 6vw, 6rem);
+  align-items: start;
+}
+
+.amenities-media .experience-amenities {
+  margin-top: 0;
+  grid-template-columns: 1fr;
+  min-width: 0;
+}
+
+.amenities-preview {
+  min-width: 0;
+}
+
+.amenities-preview-frame {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background: var(--surface);
+  will-change: opacity;
+}
+
+.amenities-preview-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.amenities-preview-caption {
+  margin-top: 0.9rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.4vw, 1.3rem);
+  color: var(--color-green);
+}
+
+.amenities-preview-number {
+  color: var(--color-gold);
+  letter-spacing: 0.08em;
+}
+
 .amenity-row {
   display: flex;
   align-items: baseline;
@@ -1236,6 +1286,46 @@ textarea:focus-visible {
 
 .amenity-row:hover {
   border-bottom-color: rgba(25, 45, 35, 0.28);
+}
+
+/* Active amenity (hover / focus / tap) */
+.amenity-row {
+  cursor: pointer;
+}
+
+.amenity-row:focus-visible {
+  outline: 2px solid rgba(183, 146, 85, 0.75);
+  outline-offset: -2px;
+  border-radius: 2px;
+}
+
+.amenity-row--active {
+  border-bottom-color: rgba(183, 146, 85, 0.55);
+}
+
+.amenity-row--active .amenity-number,
+.amenity-row--active:hover .amenity-number,
+.experience-amenities .amenity-row--active .amenity-number {
+  color: #B79255;
+}
+
+.amenity-row--active .amenity-name,
+.amenity-row--active:hover .amenity-name,
+.experience-amenities .amenity-row--active .amenity-name {
+  color: #173C2B;
+}
+
+@media (max-width: 768px) {
+  .amenities-media {
+    grid-template-columns: 1fr;
+    row-gap: clamp(2rem, 5vw, 3rem);
+  }
+  .amenities-media .experience-amenities {
+    grid-template-columns: 1fr;
+  }
+  .amenities-preview-frame {
+    aspect-ratio: 16 / 9;
+  }
 }
 
 .experiences-list {

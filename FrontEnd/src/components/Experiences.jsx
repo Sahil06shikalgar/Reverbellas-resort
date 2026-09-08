@@ -1,15 +1,52 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { amenities } from '../data/amenities';
+import { images } from '../data/media';
 import swimImage from '../assets/media/IMG-20260828-WA0005.jpg';
+import playImage from '../assets/media/4686c0b060c3a3f60095bcbe7fbe5aa7.jpg';
+import celebrateImage from '../assets/media/zMWWoOhN6T4YoC6TUKz2kAUwf_ANrwlcbUaPvokykrW2KB1XS2pNosVAEaVpRMtoh-iV852pr4T9ujQUYRS6p2fP_J-JMSVIQTNn3NyhM7ATk8RWcTFeDOLKaaq7tiJR8OAZHRBLocaqB7zsmAwqfB5Ero3lHenIfZk1P1ecg.jfif';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const AMENITIES = ['Swimming Pool', 'Green Lawns', 'Bonfire', 'Cricket', 'Badminton', 'Music System', 'Karaoke Music'];
+const AMENITIES = [
+  { number: '01', title: 'Swimming Pool', image: images.WA0007 },
+  { number: '02', title: 'Green Lawns', image: images.WA0005 },
+  { number: '03', title: 'Bonfire', image: images.WA0011 },
+  { number: '04', title: 'Cricket', image: playImage },
+  { number: '05', title: 'Badminton', image: playImage },
+  { number: '06', title: 'Music System', image: images.WA0017 },
+  { number: '07', title: 'Karaoke Music', image: celebrateImage },
+];
 
 export default function Experiences() {
   const rootRef = useRef(null);
+  const previewRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const activate = (i) => {
+    if (i === activeIndex) return;
+    const frame = previewRef.current;
+    if (!frame) {
+      setActiveIndex(i);
+      return;
+    }
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      setActiveIndex(i);
+      return;
+    }
+    gsap.killTweensOf(frame);
+    gsap.to(frame, {
+      opacity: 0,
+      duration: 0.15,
+      ease: 'power2.out',
+      onComplete: () => {
+        setActiveIndex(i);
+        gsap.fromTo(frame, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+      },
+    });
+  };
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -83,13 +120,46 @@ export default function Experiences() {
           <span className="exp-heading-desktop">Everything You Need<br />to Unwind</span>
           <span className="exp-heading-mobile" aria-hidden="true">Everything You<br />Need to Unwind</span>
         </h2>
-        <div className="experience-amenities" aria-label="Resort amenities">
-          {AMENITIES.map((a, i) => (
-            <div className="amenity-row" key={a}>
-              <span className="amenity-number">{String(i + 1).padStart(2, '0')}</span>
-              <span className="amenity-name">{a}</span>
+        <div className="amenities-media">
+          <div className="experience-amenities" role="tablist" aria-label="Resort amenities">
+            {AMENITIES.map((a, i) => (
+              <div
+                key={a.title}
+                role="tab"
+                tabIndex={0}
+                aria-selected={i === activeIndex}
+                className={`amenity-row ${i === activeIndex ? 'amenity-row--active' : ''}`}
+                onMouseEnter={() => activate(i)}
+                onFocus={() => activate(i)}
+                onClick={() => activate(i)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    activate(i);
+                  }
+                }}
+              >
+                <span className="amenity-number">{a.number}</span>
+                <span className="amenity-name">{a.title}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="amenities-preview">
+            <div className="amenities-preview-frame" ref={previewRef}>
+              <img
+                className="amenities-preview-image"
+                src={AMENITIES[activeIndex].image}
+                alt={AMENITIES[activeIndex].title}
+                loading="lazy"
+                decoding="async"
+              />
             </div>
-          ))}
+            <p className="amenities-preview-caption">
+              <span className="amenities-preview-number">{AMENITIES[activeIndex].number}</span>
+              <span>{AMENITIES[activeIndex].title}</span>
+            </p>
+          </div>
         </div>
       </div>
 

@@ -1,4 +1,11 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL;
+
+if (!API_URL) {
+  throw new Error(
+    "VITE_API_URL is not set. Set VITE_API_URL to the deployed backend " +
+    "(e.g. https://riverbells-backend.up.railway.app/api) on the Vercel frontend and redeploy."
+  );
+}
 
 const TOKEN_KEY = "riverbells_token";
 
